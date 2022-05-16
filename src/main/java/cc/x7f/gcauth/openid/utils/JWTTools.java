@@ -6,6 +6,6 @@ import com.auth0.jwt.interfaces.DecodedJWT;
 public class JWTTools {
     public static String decode(String token) {
         DecodedJWT dJwt = JWT.decode(token);
-        return  dJwt.getClaim("email").asString();
+        return  dJwt.getSubject();
     }
 }

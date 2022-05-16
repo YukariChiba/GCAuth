@@ -59,10 +59,10 @@ public final class OpenIDExternalAuthenticator implements Router {
             return;
         }
         String id_token = new Gson().fromJson(authresult, JsonObject.class).get("id_token").getAsString();
-        String email = JWTTools.decode(id_token);
-        Account account = DatabaseHelper.getAccountByName(email);
+        String username = JWTTools.decode(id_token);
+        Account account = DatabaseHelper.getAccountByName(username);
         if (account == null) {
-            account = DatabaseHelper.createAccountWithPassword(email, "");
+            account = DatabaseHelper.createAccountWithPassword(username, "");
             Grasscutter.getLogger()
                     .info(String.format("[GCAuth-OpenID] Client %s registered as %s", req.ip(), account.getId()));
         }
