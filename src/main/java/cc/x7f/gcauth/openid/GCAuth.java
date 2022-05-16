@@ -1,14 +1,14 @@
-package me.exzork.gcauth;
+package cc.x7f.gcauth.openid;
 
 import com.google.gson.Gson;
 import com.google.gson.GsonBuilder;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.auth.DefaultAuthentication;
 import emu.grasscutter.plugin.Plugin;
-import static emu.grasscutter.Configuration.ACCOUNT;
+import emu.grasscutter.server.http.HttpServer;
 
-import me.exzork.gcauth.handler.*;
-import me.exzork.gcauth.utils.Authentication;
+import cc.x7f.gcauth.openid.handler.*;
+import cc.x7f.gcauth.openid.routes.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -33,13 +33,10 @@ public class GCAuth extends Plugin {
             }
         }
         loadConfig();
-        Grasscutter.setAuthenticationSystem(new GCAuthAuthenticationHandler());
-        getLogger().info("GCAuth Enabled!");
-        config.jwtSecret = Authentication.generateRandomString(32);
+        Grasscutter.setAuthenticationSystem(new AuthenticationHandler());
+        loadTwitterLogin();
+        getLogger().info("GCAuth-OpenID Enabled!");
         saveConfig();
-        if (ACCOUNT.autoCreate) {
-            getLogger().warn("GCAuth does not support automatic account creation. Please disable in the server's config.json or just ignore this warning.");
-        }
     }
 
     @Override
@@ -71,5 +68,11 @@ public class GCAuth extends Plugin {
 
     public Config getConfig() {
         return config;
+    }
+
+    public void loadTwitterLogin() {
+        HttpServer app = Grasscutter.getHttpServer();
+        app.addRouter(RedirectHandler.class);
+        app.addRouter(OpenIDExternalAuthenticator.class);
     }
 }

@@ -1,4 +1,4 @@
-package me.exzork.gcauth.json;
+package cc.x7f.gcauth.openid.json;
 
 public class AuthResponseJson {
     public boolean success;

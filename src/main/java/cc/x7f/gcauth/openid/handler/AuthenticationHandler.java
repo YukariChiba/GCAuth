@@ -1,14 +1,14 @@
-package me.exzork.gcauth.handler;
+package cc.x7f.gcauth.openid.handler;
 
 import emu.grasscutter.auth.*;
 import emu.grasscutter.server.http.objects.ComboTokenResJson;
 import emu.grasscutter.server.http.objects.LoginResultJson;
 
-public class GCAuthAuthenticationHandler implements AuthenticationSystem {
-    private final Authenticator<LoginResultJson> gcAuthAuthenticator = new GCAuthenticators.GCAuthAuthenticator();
+public class AuthenticationHandler implements AuthenticationSystem {
+    private final Authenticator<LoginResultJson> noAuthAuthenticator = new NoAuthAuthenticator();
     private final Authenticator<LoginResultJson> tokenAuthenticator = new DefaultAuthenticators.TokenAuthenticator();
     private final Authenticator<ComboTokenResJson> sessionKeyAuthenticator = new DefaultAuthenticators.SessionKeyAuthenticator();
-    private final GCAuthExternalAuthenticator externalAuthenticator = new GCAuthExternalAuthenticator();
+    private final NoExternalAuthenticator noExternalAuthenticator = new NoExternalAuthenticator();
 
     @Override
     public void createAccount(String username, String password) {
@@ -27,7 +27,7 @@ public class GCAuthAuthenticationHandler implements AuthenticationSystem {
 
     @Override
     public Authenticator<LoginResultJson> getPasswordAuthenticator() {
-        return gcAuthAuthenticator;
+        return noAuthAuthenticator;
     }
 
     @Override
@@ -42,6 +42,6 @@ public class GCAuthAuthenticationHandler implements AuthenticationSystem {
 
     @Override
     public ExternalAuthenticator getExternalAuthenticator() {
-        return externalAuthenticator;
+        return noExternalAuthenticator;
     }
 }

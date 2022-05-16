@@ -9,8 +9,8 @@ plugins {
 sourceCompatibility = 17
 targetCompatibility = 17
 
-group 'me.exzork.gcauth'
-version '2.2.1'
+group 'cc.x7f.gcauth.openid'
+version '0.1.0'
 
 repositories {
     mavenCentral()
@@ -22,6 +22,8 @@ dependencies {
     implementation 'commons-logging:commons-logging:1.2'
     implementation 'com.auth0:java-jwt:3.19.1'
     implementation 'javax.servlet:javax.servlet-api:4.0.1'
+    implementation 'org.apache.httpcomponents:httpclient:4.5.1'
+    implementation 'org.apache.httpcomponents:httpcore:4.4.15'
 }
 
 test {
@@ -30,13 +32,15 @@ test {
 
 jar{
     jar.baseName = 'gcauth'
+    duplicatesStrategy = DuplicatesStrategy.EXCLUDE
     from{
         configurations.runtimeClasspath.collect{
-            if (it.name in ['spring-security-crypto-5.6.3.jar','commons-logging-1.2.jar','javax.servlet-api-4.0.1.jar','java-jwt-3.19.1.jar','jackson-annotations-2.13.2.jar','jackson-core-2.13.2.jar','jackson-databind-2.13.2.2.jar']) {
+            if (it.name in ['spring-security-crypto-5.6.3.jar','commons-logging-1.2.jar','javax.servlet-api-4.0.1.jar','java-jwt-3.19.1.jar','jackson-annotations-2.13.2.jar','jackson-core-2.13.2.jar','jackson-databind-2.13.2.2.jar','httpclient-4.5.1.jar','httpcore-4.4.15.jar']) {
                 zipTree(it)
             }
         }
-    }{
+    }
+    {
         exclude('META-INF/LICENSE*')
         exclude("META-INF/versions/9/module-info.class")
         exclude("META-INF/NOTICE")
