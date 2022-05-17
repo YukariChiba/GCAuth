@@ -8,6 +8,8 @@ import cc.x7f.gcauth.openid.utils.OAuth;
 import emu.grasscutter.server.http.Router;
 import emu.grasscutter.server.http.objects.LoginResultJson;
 import emu.grasscutter.Grasscutter;
+import emu.grasscutter.auth.AuthenticationSystem.AuthenticationRequest;
+import emu.grasscutter.auth.OAuthAuthenticator;
 import emu.grasscutter.game.Account;
 import cc.x7f.gcauth.openid.GCAuth;
 import cc.x7f.gcauth.openid.json.VerifyJson;
@@ -20,21 +22,7 @@ import express.http.Response;
 
 import io.javalin.Javalin;
 
-public final class OpenIDExternalAuthenticator implements Router {
-
-    @Override
-    public void applyRoutes(Express express, Javalin javalin) {
-        express.post("/hk4e_global/mdk/shield/api/loginByThirdparty", OpenIDExternalAuthenticator::handle);
-        express.get("/authentication/openid/redirect", OpenIDExternalAuthenticator::redirect);
-    }
-
-    // convert code to accessToken
-    public static void redirect(Request req, Response res) {
-        res.send(
-                String.format(
-                        "<meta http-equiv=\"refresh\" content=\"0;url=uniwebview://sdkThirdLogin?accessToken=%s\">",
-                        req.query("code")));
-    }
+public final class OIDCAuthenticator implements OAuthAuthenticator {
 
     static void reject(Request req, Response res) {
         LoginResultJson responseData = new LoginResultJson();
@@ -57,7 +45,11 @@ public final class OpenIDExternalAuthenticator implements Router {
         res.send(responseData);
     }
 
-    public static void handle(Request req, Response res) {
+
+    @Override
+    public void handleLogin(AuthenticationRequest authenticationRequest) {
+        Request req = authenticationRequest.getRequest();
+        Response res = authenticationRequest.getResponse();
         VerifyJson verifyjson = req.body(VerifyJson.class);
         String accessCode = verifyjson.access_token;
         String authresult = null;
@@ -81,5 +73,35 @@ public final class OpenIDExternalAuthenticator implements Router {
                     .info(String.format("Client %s registered as %s", req.ip(), account.getId()));
         }
         accept(req, res, account);
+    }
+
+    @Override
+    public void handleDesktopRedirection(AuthenticationRequest authenticationRequest) {
+        String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
+                + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
+        Response res = authenticationRequest.getResponse();
+        res.set("server", "tsa_m");
+        res.set("Content-Type", "application/json; charset=utf-8");
+        res.set("access-control-allow-credentials", "true");
+        res.set("access-control-allow-origin", "https://account.hoyoverse.com");
+        res.send(String.format(
+                "{\"code\":200,\"data\":{\"auth_url\":\"%s\",\"info\":\"\",\"msg\":\"Success\",\"status\":1}}",
+                Login_Url));
+    }
+
+    @Override
+    public void handleMobileRedirection(AuthenticationRequest authenticationRequest) {
+        String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
+                + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
+        authenticationRequest.getResponse().send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
+    }
+
+    @Override
+    public void handleTokenProcess(AuthenticationRequest authenticationRequest) {
+        authenticationRequest.getResponse().send(
+            String.format(
+                    "<meta http-equiv=\"refresh\" content=\"0;url=uniwebview://sdkThirdLogin?accessToken=%s\">",
+                    authenticationRequest.getRequest().query("code")));
+        
     }
 }

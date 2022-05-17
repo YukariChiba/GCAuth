@@ -9,6 +9,7 @@ public class AuthenticationHandler implements AuthenticationSystem {
     private final Authenticator<LoginResultJson> tokenAuthenticator = new DefaultAuthenticators.TokenAuthenticator();
     private final Authenticator<ComboTokenResJson> sessionKeyAuthenticator = new DefaultAuthenticators.SessionKeyAuthenticator();
     private final NoExternalAuthenticator noExternalAuthenticator = new NoExternalAuthenticator();
+    private final OAuthAuthenticator oAuthAuthenticator = new OIDCAuthenticator();
 
     @Override
     public void createAccount(String username, String password) {
@@ -43,5 +44,10 @@ public class AuthenticationHandler implements AuthenticationSystem {
     @Override
     public ExternalAuthenticator getExternalAuthenticator() {
         return noExternalAuthenticator;
+    }
+
+    @Override
+    public OAuthAuthenticator getOAuthAuthenticator() {
+        return oAuthAuthenticator;
     }
 }
