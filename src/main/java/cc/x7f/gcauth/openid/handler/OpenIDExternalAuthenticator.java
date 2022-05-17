@@ -9,6 +9,7 @@ import emu.grasscutter.server.http.Router;
 import emu.grasscutter.server.http.objects.LoginResultJson;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.game.Account;
+import cc.x7f.gcauth.openid.GCAuth;
 import cc.x7f.gcauth.openid.json.VerifyJson;
 
 import emu.grasscutter.database.DatabaseHelper;
@@ -37,7 +38,7 @@ public final class OpenIDExternalAuthenticator implements Router {
 
     static void reject(Request req, Response res) {
         LoginResultJson responseData = new LoginResultJson();
-        Grasscutter.getLogger().info("[GCAuth] Client " + req.ip() + " failed to log in");
+        Grasscutter.getLogger().info("Client " + req.ip() + " failed to log in");
         responseData.retcode = -201;
         responseData.message = "Invalid credential";
         res.send(responseData);
@@ -51,7 +52,7 @@ public final class OpenIDExternalAuthenticator implements Router {
         responseData.data.account.email = account.getEmail();
         responseData.data.account.twitter_name = account.getUsername();
         Grasscutter.getLogger().info(
-                String.format("[GCAuth-OpenID] Client %s logged in as %s", req.ip(),
+                String.format("Client %s logged in as %s", req.ip(),
                         responseData.data.account.uid));
         res.send(responseData);
     }
@@ -72,12 +73,12 @@ public final class OpenIDExternalAuthenticator implements Router {
             return;
         }
         String id_token = new Gson().fromJson(authresult, JsonObject.class).get("id_token").getAsString();
-        String username = JWTTools.getSubject(id_token);
+        String username = JWTTools.getClaim(id_token, GCAuth.getConfigStatic().username_claim);
         Account account = DatabaseHelper.getAccountByName(username);
         if (account == null) {
             account = DatabaseHelper.createAccountWithPassword(username, "");
             Grasscutter.getLogger()
-                    .info(String.format("[GCAuth-OpenID] Client %s registered as %s", req.ip(), account.getId()));
+                    .info(String.format("Client %s registered as %s", req.ip(), account.getId()));
         }
         accept(req, res, account);
     }
