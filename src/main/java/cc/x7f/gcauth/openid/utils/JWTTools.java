@@ -4,8 +4,12 @@ import com.auth0.jwt.JWT;
 import com.auth0.jwt.interfaces.DecodedJWT;
 
 public class JWTTools {
-    public static String decode(String token) {
+    public static String getSubject(String token) {
         DecodedJWT dJwt = JWT.decode(token);
         return  dJwt.getSubject();
+    }
+    public static String getClaim(String token, String claim) {
+        DecodedJWT dJwt = JWT.decode(token);
+        return  dJwt.getClaim(claim).asString();
     }
 }

@@ -16,8 +16,17 @@ public final class RedirectHandler implements Router {
     @Override
     public void applyRoutes(Express express, Javalin javalin) {
         express.get("/Api/twitter_login", RedirectHandler::handleJson);
+        express.get("/sdkTwitterLogin.html", RedirectHandler::handleMeta);
     }
 
+    // Redirection for mobile login
+    public static void handleMeta(Request req, Response res) {
+        String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
+                + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
+        res.send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
+    }
+
+    // Redirection for desktop login
     public static void handleJson(Request req, Response res) {
         String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
                 + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
