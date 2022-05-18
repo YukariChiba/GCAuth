@@ -1,7 +1,7 @@
 {
   "name": "GCAuth-OpenID",
   "description": "GCAuth-OpenID is a plugin that allows you to implement OpenID-based authentication for your server.",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "author": ["Yukari Chiba"],
   "mainClass": "cc.x7f.gcauth.openid.GCAuth"
 }

@@ -1,6 +1,8 @@
 package cc.x7f.gcauth.openid.handler;
 
+import emu.grasscutter.game.Account;
 import emu.grasscutter.auth.*;
+import emu.grasscutter.auth.DefaultAuthenticators;
 import emu.grasscutter.server.http.objects.ComboTokenResJson;
 import emu.grasscutter.server.http.objects.LoginResultJson;
 
@@ -8,7 +10,7 @@ public class AuthenticationHandler implements AuthenticationSystem {
     private final Authenticator<LoginResultJson> noAuthAuthenticator = new NoAuthAuthenticator();
     private final Authenticator<LoginResultJson> tokenAuthenticator = new DefaultAuthenticators.TokenAuthenticator();
     private final Authenticator<ComboTokenResJson> sessionKeyAuthenticator = new DefaultAuthenticators.SessionKeyAuthenticator();
-    private final NoExternalAuthenticator noExternalAuthenticator = new NoExternalAuthenticator();
+    private final ExternalAuthenticator externalAuthenticator = new DefaultAuthenticators.ExternalAuthentication();
     private final OAuthAuthenticator oAuthAuthenticator = new OIDCAuthenticator();
 
     @Override
@@ -22,8 +24,8 @@ public class AuthenticationHandler implements AuthenticationSystem {
     }
 
     @Override
-    public boolean verifyUser(String s) {
-        return false;
+    public Account verifyUser(String s) {
+        return null;
     }
 
     @Override
@@ -43,7 +45,7 @@ public class AuthenticationHandler implements AuthenticationSystem {
 
     @Override
     public ExternalAuthenticator getExternalAuthenticator() {
-        return noExternalAuthenticator;
+        return externalAuthenticator;
     }
 
     @Override

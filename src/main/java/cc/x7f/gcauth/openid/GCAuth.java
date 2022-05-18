@@ -5,7 +5,6 @@ import com.google.gson.GsonBuilder;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.auth.DefaultAuthentication;
 import emu.grasscutter.plugin.Plugin;
-import emu.grasscutter.server.http.HttpServer;
 
 import cc.x7f.gcauth.openid.handler.*;
 

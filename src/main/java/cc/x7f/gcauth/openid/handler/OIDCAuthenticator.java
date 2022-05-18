@@ -5,7 +5,6 @@ import com.google.gson.JsonObject;
 
 import cc.x7f.gcauth.openid.utils.JWTTools;
 import cc.x7f.gcauth.openid.utils.OAuth;
-import emu.grasscutter.server.http.Router;
 import emu.grasscutter.server.http.objects.LoginResultJson;
 import emu.grasscutter.Grasscutter;
 import emu.grasscutter.auth.AuthenticationSystem.AuthenticationRequest;
@@ -16,19 +15,16 @@ import cc.x7f.gcauth.openid.json.VerifyJson;
 
 import emu.grasscutter.database.DatabaseHelper;
 
-import express.Express;
 import express.http.Request;
 import express.http.Response;
 
-import io.javalin.Javalin;
-
 public final class OIDCAuthenticator implements OAuthAuthenticator {
 
-    static void reject(Request req, Response res) {
+    static void reject(Request req, Response res, String reason) {
         LoginResultJson responseData = new LoginResultJson();
         Grasscutter.getLogger().info("Client " + req.ip() + " failed to log in");
         responseData.retcode = -201;
-        responseData.message = "Invalid credential";
+        responseData.message = reason;
         res.send(responseData);
     }
 
@@ -56,19 +52,18 @@ public final class OIDCAuthenticator implements OAuthAuthenticator {
         try {
             authresult = OAuth.auth(accessCode);
         } catch (Exception err) {
-            Grasscutter.getLogger().info(err.getMessage());
-            reject(req, res);
+            reject(req, res, "Server error.");
             return;
         }
         if (authresult == null) {
-            reject(req, res);
+            reject(req, res, "Invalid credential.");
             return;
         }
         String id_token = new Gson().fromJson(authresult, JsonObject.class).get("id_token").getAsString();
         String username = JWTTools.getClaim(id_token, GCAuth.getConfigStatic().username_claim);
         Account account = DatabaseHelper.getAccountByName(username);
         if (account == null) {
-            account = DatabaseHelper.createAccountWithPassword(username, "");
+            account = DatabaseHelper.createAccount(username);
             Grasscutter.getLogger()
                     .info(String.format("Client %s registered as %s", req.ip(), account.getId()));
         }
