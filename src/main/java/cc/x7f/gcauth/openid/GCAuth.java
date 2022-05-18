@@ -8,7 +8,6 @@ import emu.grasscutter.plugin.Plugin;
 import emu.grasscutter.server.http.HttpServer;
 
 import cc.x7f.gcauth.openid.handler.*;
-import cc.x7f.gcauth.openid.routes.*;
 
 import java.io.File;
 import java.io.FileReader;
@@ -34,7 +33,6 @@ public class GCAuth extends Plugin {
         }
         loadConfig();
         Grasscutter.setAuthenticationSystem(new AuthenticationHandler());
-        loadTwitterLogin();
         getLogger().info("GCAuth-OpenID Enabled!");
         saveConfig();
     }
@@ -68,11 +66,5 @@ public class GCAuth extends Plugin {
 
     public Config getConfig() {
         return config;
-    }
-
-    public void loadTwitterLogin() {
-        HttpServer app = Grasscutter.getHttpServer();
-        app.addRouter(RedirectHandler.class);
-        app.addRouter(OpenIDExternalAuthenticator.class);
     }
 }
