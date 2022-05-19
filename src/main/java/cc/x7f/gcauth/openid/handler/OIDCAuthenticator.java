@@ -1,5 +1,7 @@
 package cc.x7f.gcauth.openid.handler;
 
+import java.util.Arrays;
+
 import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 
@@ -11,6 +13,7 @@ import emu.grasscutter.auth.AuthenticationSystem.AuthenticationRequest;
 import emu.grasscutter.auth.OAuthAuthenticator;
 import emu.grasscutter.game.Account;
 import cc.x7f.gcauth.openid.GCAuth;
+import cc.x7f.gcauth.openid.Config.PermissionSettings;
 import cc.x7f.gcauth.openid.json.VerifyJson;
 
 import emu.grasscutter.database.DatabaseHelper;
@@ -19,6 +22,22 @@ import express.http.Request;
 import express.http.Response;
 
 public final class OIDCAuthenticator implements OAuthAuthenticator {
+
+    static void addPermissions(Account account, String[] permissions) {
+        for (String permission : permissions) {
+            account.addPermission(permission);
+        }
+    }
+
+    static void setupPermission(Account account, String[] groups) {
+        addPermissions(account, GCAuth.getConfigStatic().default_permission_nodes);
+        if (groups != null)
+            for (PermissionSettings permissionSetting : GCAuth.getConfigStatic().permission_settings) {
+                if (Arrays.asList(groups).contains(permissionSetting.group_id)) {
+                    addPermissions(account, permissionSetting.permission_nodes);
+                }
+            }
+    }
 
     static void reject(Request req, Response res, String reason) {
         LoginResultJson responseData = new LoginResultJson();
@@ -41,7 +60,6 @@ public final class OIDCAuthenticator implements OAuthAuthenticator {
         res.send(responseData);
     }
 
-
     @Override
     public void handleLogin(AuthenticationRequest authenticationRequest) {
         Request req = authenticationRequest.getRequest();
@@ -61,9 +79,14 @@ public final class OIDCAuthenticator implements OAuthAuthenticator {
         }
         String id_token = new Gson().fromJson(authresult, JsonObject.class).get("id_token").getAsString();
         String username = JWTTools.getClaim(id_token, GCAuth.getConfigStatic().username_claim);
+        if (username == null) {
+            reject(req, res, "No associated username.");
+        }
+        String[] groups = JWTTools.getClaims(id_token, GCAuth.getConfigStatic().group_claim);
         Account account = DatabaseHelper.getAccountByName(username);
         if (account == null) {
             account = DatabaseHelper.createAccount(username);
+            setupPermission(account, groups);
             Grasscutter.getLogger()
                     .info(String.format("Client %s registered as %s", req.ip(), account.getId()));
         }
@@ -88,15 +111,16 @@ public final class OIDCAuthenticator implements OAuthAuthenticator {
     public void handleMobileRedirection(AuthenticationRequest authenticationRequest) {
         String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
                 + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
-        authenticationRequest.getResponse().send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
+        authenticationRequest.getResponse()
+                .send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
     }
 
     @Override
     public void handleTokenProcess(AuthenticationRequest authenticationRequest) {
         authenticationRequest.getResponse().send(
-            String.format(
-                    "<meta http-equiv=\"refresh\" content=\"0;url=uniwebview://sdkThirdLogin?accessToken=%s\">",
-                    authenticationRequest.getRequest().query("code")));
-        
+                String.format(
+                        "<meta http-equiv=\"refresh\" content=\"0;url=uniwebview://sdkThirdLogin?accessToken=%s\">",
+                        authenticationRequest.getRequest().query("code")));
+
     }
 }

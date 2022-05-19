@@ -6,7 +6,7 @@ Grasscutter Authentication System (Based on OpenID)
 
 | GCAuth-OpenID | Grasscutter Development | Grasscutter Stable |
 |---------------|-------------------------|--------------------|
-| 0.1.0 - 0.3.0 | 1.1.2-dev               | -                  |
+| 0.1.0 - 0.4.0 | 1.1.2-dev               | -                  |
 
 ### Usage : 
 
@@ -22,6 +22,11 @@ Start the server and stop it. You'll find `plugins/GCAuth-OpenID/config.json`. M
 - `auth_endpoint` and `token_endpoint`: OIDC API to request authentication.
 - `redirect_uri`: `https://YOUR_SERVER/authentication/openid/redirect`.
 - `username_claim`: Claim field to use as an username.
+- `group_claim`: Claim field to use as groups.
+- `default_permission_nodes`: Default permission nodes.
+- `permission_settings`: Permission settings per group.
+    - `group_id`: Group name.
+    - `permission_nodes`: Permission nodes for this group.
 
 #### Step 3: Run
 
