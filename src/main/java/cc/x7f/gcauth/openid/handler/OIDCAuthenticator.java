@@ -94,25 +94,23 @@ public final class OIDCAuthenticator implements OAuthAuthenticator {
     }
 
     @Override
-    public void handleDesktopRedirection(AuthenticationRequest authenticationRequest) {
+    public void handleRedirection(AuthenticationRequest authenticationRequest, ClientType clientType) {
         String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
                 + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
-        Response res = authenticationRequest.getResponse();
-        res.set("server", "tsa_m");
-        res.set("Content-Type", "application/json; charset=utf-8");
-        res.set("access-control-allow-credentials", "true");
-        res.set("access-control-allow-origin", "https://account.hoyoverse.com");
-        res.send(String.format(
-                "{\"code\":200,\"data\":{\"auth_url\":\"%s\",\"info\":\"\",\"msg\":\"Success\",\"status\":1}}",
-                Login_Url));
-    }
-
-    @Override
-    public void handleMobileRedirection(AuthenticationRequest authenticationRequest) {
-        String Login_Url = (GCAuth.getConfigStatic().auth_endpoint + "?response_type=code&scope=openid&redirect_uri="
-                + GCAuth.getConfigStatic().redirect_uri + "&client_id=" + GCAuth.getConfigStatic().client_id);
-        authenticationRequest.getResponse()
-                .send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
+        if (clientType == ClientType.DESKTOP) {
+            Response res = authenticationRequest.getResponse();
+            res.set("server", "tsa_m");
+            res.set("Content-Type", "application/json; charset=utf-8");
+            res.set("access-control-allow-credentials", "true");
+            res.set("access-control-allow-origin", "https://account.hoyoverse.com");
+            res.send(String.format(
+                    "{\"code\":200,\"data\":{\"auth_url\":\"%s\",\"info\":\"\",\"msg\":\"Success\",\"status\":1}}",
+                    Login_Url));
+        }
+        if (clientType == ClientType.MOBILE) {
+            authenticationRequest.getResponse()
+                    .send(String.format("<meta http-equiv=\"refresh\" content=\"0;url=%s\">", Login_Url));
+        }
     }
 
     @Override

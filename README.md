@@ -6,7 +6,7 @@ Grasscutter Authentication System (Based on OpenID)
 
 | GCAuth-OpenID | Grasscutter Development | Grasscutter Stable |
 |---------------|-------------------------|--------------------|
-| 0.1.0 - 0.4.0 | 1.1.2-dev               | -                  |
+| 0.1.0 - 0.5.0 | 1.1.2-dev               | -                  |
 
 ### Usage : 
 
